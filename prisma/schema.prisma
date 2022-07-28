@@ -1,0 +1,84 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CardType {
+  credit
+  debit
+  both
+}
+
+model User {
+  id        Int      @id @unique @default(autoincrement())
+  email     String   @db.Text @unique
+  password  String   @db.Text
+  createdAt DateTime @default(now())
+
+  @@map("users")
+  credentials Credential[]
+  notes       Note[]
+  cards       Card[]
+  wifis       Wifi[]
+}
+
+model Credential {
+  id        Int      @id @unique @default(autoincrement())
+  url       String   @db.Text
+  username  String   @db.Text
+  password  String   @db.Text
+  title     String   @db.Text
+  createdAt DateTime @default(now())
+  userId    Int      @db.Integer
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, title])
+  @@map("credentials")
+}
+
+model Note {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.VarChar(50) 
+  content   String   @db.VarChar(1000)
+  createdAt DateTime @default(now())
+  userId    Int      @db.Integer
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, title])
+  @@map("notes")
+}
+
+model Card {
+  id             Int      @id @default(autoincrement())
+  title          String   @db.Text
+  number         String   @db.Text
+  cardholderName String   @db.Text
+  securityCode   String   @db.Text
+  expirationDate String   @db.Text
+  password       String   @db.Text
+  isVirtual      Boolean  @db.Boolean
+  type           CardType 
+  createdAt      DateTime @default(now())
+  userId         Int      @db.Integer
+  user           User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, title])
+  @@map("cards")
+}
+
+model Wifi {
+  id        Int      @id @default(autoincrement())
+  title     String   @db.Text
+  name      String   @db.Text
+  password  String   @db.Text
+  createdAt DateTime @default(now())
+  userId    Int      @db.Integer
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, title])
+  @@map("wifis")
+}
